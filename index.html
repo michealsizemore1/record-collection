@@ -413,10 +413,29 @@ const DEFAULT_RECORDS = [
   {artist:"Richard Marx",album:"Repeat Offender",genre:"Rock/Pop",year:1989,format:"LP",iTunesSearch:"Richard Marx Repeat Offender"},
   // Photo 4 (new additions)
   {artist:"Elle King",album:"Come Get Your Wife",genre:"Rock",year:2023,format:"LP",iTunesSearch:"Elle King Come Get Your Wife"},
-  {artist:"Shirley Bassey",album:"Sings Heart Songs",genre:"Jazz/Pop",year:1987,format:"LP",iTunesSearch:"Shirley Bassey Sings Heart Songs"},
   {artist:"Various Artists",album:"The Breakfast Club: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1985,format:"LP",iTunesSearch:"Breakfast Club Original Motion Picture Soundtrack"},
-  {artist:"Conway Twitty",album:"People in Motion",genre:"Country",year:1973,format:"LP",iTunesSearch:"Conway Twitty People in Motion"},
   {artist:"Conway Twitty",album:"#13: The Warner Bros. Years",genre:"Country",year:1994,format:"LP",iTunesSearch:"Conway Twitty Warner Bros Years"},
+  // Photo 5
+  {artist:"Green Day",album:"Greatest Hits: God's Favorite Band",genre:"Alternative",year:2017,format:"LP",iTunesSearch:"Green Day Greatest Hits Gods Favorite Band"},
+  {artist:"Pearl Jam",album:"Vitalogy",genre:"Alternative",year:1994,format:"LP",iTunesSearch:"Pearl Jam Vitalogy"},
+  {artist:"Guns N' Roses",album:"Appetite for Destruction",genre:"Rock",year:1987,format:"LP",iTunesSearch:"Guns N Roses Appetite for Destruction"},
+  {artist:"Pantera",album:"Vulgar Display of Power",genre:"Metal",year:1992,format:"LP",iTunesSearch:"Pantera Vulgar Display of Power"},
+  {artist:"Whitesnake",album:"Whitesnake",genre:"Rock",year:1987,format:"LP",iTunesSearch:"Whitesnake 1987"},
+  {artist:"Linkin Park",album:"Hybrid Theory",genre:"Alternative",year:2000,format:"LP",iTunesSearch:"Linkin Park Hybrid Theory"},
+  {artist:"Jim Croce",album:"You Don't Mess Around with Jim",genre:"Rock/Pop",year:1972,format:"LP",iTunesSearch:"Jim Croce You Dont Mess Around With Jim"},
+  {artist:"Jim Croce",album:"Life and Times",genre:"Rock/Pop",year:1973,format:"LP",iTunesSearch:"Jim Croce Life and Times"},
+  {artist:"Evanescence",album:"Fallen",genre:"Alternative",year:2003,format:"LP",iTunesSearch:"Evanescence Fallen"},
+  {artist:"blink-182",album:"Enema of the State",genre:"Alternative",year:1999,format:"LP",iTunesSearch:"blink-182 Enema of the State"},
+  {artist:"Metallica",album:"Ride the Lightning",genre:"Metal",year:1984,format:"LP",iTunesSearch:"Metallica Ride the Lightning"},
+  {artist:"Nirvana",album:"Nevermind",genre:"Alternative",year:1991,format:"LP",iTunesSearch:"Nirvana Nevermind"},
+  {artist:"Jim Croce",album:"The Faces I've Been",genre:"Rock/Pop",year:1975,format:"LP",iTunesSearch:"Jim Croce The Faces Ive Been"},
+  {artist:"Poison",album:"Greatest Hits 1986–1996",genre:"Rock",year:1996,format:"LP",iTunesSearch:"Poison Greatest Hits 1986 1996"},
+  {artist:"Jim Croce",album:"Life Song",genre:"Rock/Pop",year:1976,format:"LP",iTunesSearch:"Jim Croce Life Song"},
+  {artist:"Creedence Clearwater Revival",album:"Chronicle",genre:"Rock",year:1976,format:"LP",iTunesSearch:"Creedence Clearwater Revival Chronicle"},
+  {artist:"Foo Fighters",album:"Greatest Hits",genre:"Alternative",year:2009,format:"LP",iTunesSearch:"Foo Fighters Greatest Hits"},
+  {artist:"Goo Goo Dolls",album:"Greatest Hits Volume One: The Singles",genre:"Alternative",year:2007,format:"LP",iTunesSearch:"Goo Goo Dolls Greatest Hits Volume One Singles"},
+  {artist:"Bonnie Tyler",album:"Faster Than the Speed of Night",genre:"Rock/Pop",year:1983,format:"LP",iTunesSearch:"Bonnie Tyler Faster Than the Speed of Night"},
+  {artist:"Janis Joplin",album:"Greatest Hits",genre:"Rock",year:1973,format:"LP",iTunesSearch:"Janis Joplin Greatest Hits"},
 ];
 
 const GENRE_EMOJI = {
@@ -445,18 +464,30 @@ function saveGenres(){localStorage.setItem(GENRE_KEY,JSON.stringify(userGenres))
 let records=loadRecords();
 let userGenres=loadGenres();
 
-// Merge any DEFAULT_RECORDS not yet in stored collection (handles new additions)
-(function mergeNewDefaults(){
+// Records that were removed from the collection — purge from stored data too
+const REMOVED_RECORDS=[
+  'shirley bassey|sings heart songs',
+  'conway twitty|people in motion',
+];
+// Merge new default records + purge removed ones
+(function syncDefaults(){
+  // Remove purged records
+  const before=records.length;
+  records=records.filter(r=>{
+    const k=r.artist.toLowerCase()+'|'+r.album.toLowerCase();
+    return!REMOVED_RECORDS.includes(k);
+  });
+  // Add any missing defaults
   const keys=records.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
   let added=0;
   DEFAULT_RECORDS.forEach(d=>{
     const k=d.artist.toLowerCase()+'|'+d.album.toLowerCase();
-    if(!keys.includes(k)){
+    if(!REMOVED_RECORDS.includes(k)&&!keys.includes(k)){
       records.push({id:uid(),dateAdded:Date.now(),status:'Own It',condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,coverUrl:undefined,tracks:undefined,...d});
       keys.push(k);added++;
     }
   });
-  if(added>0) saveRecords();
+  if(added>0||records.length!==before) saveRecords();
 })();
 
 function allGenres(){
