@@ -411,6 +411,12 @@ const DEFAULT_RECORDS = [
   {artist:"Hinder",album:"Extreme Behavior",genre:"Rock",year:2005,format:"LP",iTunesSearch:"Hinder Extreme Behavior"},
   {artist:"James Taylor",album:"At Christmas",genre:"Christmas",year:2006,format:"LP",iTunesSearch:"James Taylor At Christmas"},
   {artist:"Richard Marx",album:"Repeat Offender",genre:"Rock/Pop",year:1989,format:"LP",iTunesSearch:"Richard Marx Repeat Offender"},
+  // Photo 4 (new additions)
+  {artist:"Elle King",album:"Come Get Your Wife",genre:"Rock",year:2023,format:"LP",iTunesSearch:"Elle King Come Get Your Wife"},
+  {artist:"Shirley Bassey",album:"Sings Heart Songs",genre:"Jazz/Pop",year:1987,format:"LP",iTunesSearch:"Shirley Bassey Sings Heart Songs"},
+  {artist:"Various Artists",album:"The Breakfast Club: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1985,format:"LP",iTunesSearch:"Breakfast Club Original Motion Picture Soundtrack"},
+  {artist:"Conway Twitty",album:"People in Motion",genre:"Country",year:1973,format:"LP",iTunesSearch:"Conway Twitty People in Motion"},
+  {artist:"Conway Twitty",album:"#13: The Warner Bros. Years",genre:"Country",year:1994,format:"LP",iTunesSearch:"Conway Twitty Warner Bros Years"},
 ];
 
 const GENRE_EMOJI = {
@@ -438,6 +444,20 @@ function saveGenres(){localStorage.setItem(GENRE_KEY,JSON.stringify(userGenres))
 
 let records=loadRecords();
 let userGenres=loadGenres();
+
+// Merge any DEFAULT_RECORDS not yet in stored collection (handles new additions)
+(function mergeNewDefaults(){
+  const keys=records.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
+  let added=0;
+  DEFAULT_RECORDS.forEach(d=>{
+    const k=d.artist.toLowerCase()+'|'+d.album.toLowerCase();
+    if(!keys.includes(k)){
+      records.push({id:uid(),dateAdded:Date.now(),status:'Own It',condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,coverUrl:undefined,tracks:undefined,...d});
+      keys.push(k);added++;
+    }
+  });
+  if(added>0) saveRecords();
+})();
 
 function allGenres(){
   const fromRecs=records.map(r=>r.genre).filter(Boolean);
