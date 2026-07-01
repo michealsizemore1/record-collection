@@ -969,6 +969,19 @@ document.getElementById('starPicker').addEventListener('click',e=>{
 function deleteRecord(id){
   const r=records.find(x=>x.id===id);
   if(!confirm(`Delete "${r?.album}" by ${r?.artist}?`)) return;
+  // If this record comes from DEFAULT_RECORDS, persist its key so syncDefaults
+  // won't add it back on the next page load.
+  if(r){
+    const k=r.artist.toLowerCase()+'|'+r.album.toLowerCase();
+    const isDefault=DEFAULT_RECORDS.some(d=>d.artist.toLowerCase()+'|'+d.album.toLowerCase()===k);
+    if(isDefault){
+      const existing=JSON.parse(localStorage.getItem(EXTRA_REMOVED_KEY)||'[]');
+      if(!existing.includes(k)){
+        existing.push(k);
+        localStorage.setItem(EXTRA_REMOVED_KEY,JSON.stringify(existing));
+      }
+    }
+  }
   records=records.filter(x=>x.id!==id);saveRecords();render();showToast('Record removed.');
 }
 function setRating(id,v){
