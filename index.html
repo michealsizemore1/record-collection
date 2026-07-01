@@ -576,20 +576,24 @@ const REMOVED_RECORDS=[
   'reba mcentire|greatest hits',
   'huey lewis and the news|winter wonderland',
 ];
+const EXTRA_REMOVED_KEY='vinylExtraRemoved_v1';
 // Merge new default records + purge removed ones
 (function syncDefaults(){
+  // Combine hard-coded removals with any extra ones saved by a restore
+  const extraRemoved=JSON.parse(localStorage.getItem(EXTRA_REMOVED_KEY)||'[]');
+  const allRemoved=[...REMOVED_RECORDS,...extraRemoved];
   // Remove purged records
   const before=records.length;
   records=records.filter(r=>{
     const k=r.artist.toLowerCase()+'|'+r.album.toLowerCase();
-    return!REMOVED_RECORDS.includes(k);
+    return!allRemoved.includes(k);
   });
-  // Add any missing defaults
+  // Add any missing defaults (skipped for records absent from a restore)
   const keys=records.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
   let added=0;
   DEFAULT_RECORDS.forEach(d=>{
     const k=d.artist.toLowerCase()+'|'+d.album.toLowerCase();
-    if(!REMOVED_RECORDS.includes(k)&&!keys.includes(k)){
+    if(!allRemoved.includes(k)&&!keys.includes(k)){
       records.push({id:uid(),dateAdded:Date.now(),status:'Own It',condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,coverUrl:undefined,tracks:undefined,...d});
       keys.push(k);added++;
     }
@@ -1143,6 +1147,13 @@ document.getElementById('restoreFileInput').addEventListener('change',function()
         coverUrl:r.coverUrl||undefined,tracks:r.tracks||undefined,
         ...r
       }));
+      // Persist which DEFAULT_RECORDS are absent from this backup so syncDefaults
+      // won't inject them back in on subsequent page loads.
+      const restoredKeys=records.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
+      const extraRemoved=DEFAULT_RECORDS
+        .map(d=>d.artist.toLowerCase()+'|'+d.album.toLowerCase())
+        .filter(k=>!restoredKeys.includes(k)&&!REMOVED_RECORDS.includes(k));
+      localStorage.setItem(EXTRA_REMOVED_KEY,JSON.stringify(extraRemoved));
       saveRecords();
       rebuildGenreDatalist();rebuildGenreFilter();render();
       statusEl.style.cssText='display:block;background:#1a3a1a;color:#6bff6b;border:1px solid #6bff6b';
