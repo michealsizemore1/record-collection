@@ -246,7 +246,7 @@ main{padding:20px 24px}
         <p>📷 Point your camera at a record cover — AI will identify the artist, album, year and genre automatically.</p>
         <label class="btn btn-scan" style="cursor:pointer;margin:0" title="Scan a record cover with AI">
           📷 Scan Cover
-          <input type="file" id="scanFileInput" accept="image/*" style="display:none" onchange="handleScanUpload(this)">
+          <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleScanUpload(this)">
         </label>
       </div>
       <div class="form-grid">
