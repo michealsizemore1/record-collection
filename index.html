@@ -1081,6 +1081,7 @@ async function handleScanUpload(input){
   scanOverlay.classList.add('active');
   scanLabel.textContent='Preparing image…';
 
+  const mediaType='image/jpeg';
   let base64;
   try{
     base64=await resizeForApi(file);
